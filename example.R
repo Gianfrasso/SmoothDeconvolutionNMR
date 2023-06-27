@@ -27,7 +27,7 @@ D = diff(diag(nb), diff = dd)
 # Bases for adaptive
 xa = 1:(nb - dd) / (nb - dd)
 Ba = bbase(xa, nseg = 5, bdeg = 3)
-pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=1e-14)
+pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=1e-12)
 Pl = pen_comp$Pl
 Ll = pen_comp$Ll
 
