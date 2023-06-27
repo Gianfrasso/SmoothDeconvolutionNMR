@@ -47,8 +47,17 @@ define_adaptive_penalty = function(Ba, D, dd, extra_ridge)
 }
 
 
-# Fit function
-fitLapl = function(Fx, Ci, Pl, Ll, B, maxkit = 200, maxit = 100){    
+#' Fit function
+#' 
+#' Function to fit smooth deconvolution model
+#' @param Fx: observed residual magnetization
+#' @param Ci: deconvolution matrix for integration
+#' @param Pl: adaptive penalty components
+#' @param Ll: list with a columns of the adaptive penalty bases
+#' @param maxkit: max number of updates for smoothing parameter estimation
+#' @param maxit: maximum number of internal IWLS steps (coefficient estimation)
+#' @return list of results 
+fit_smooth_deconvolution = function(Fx, Ci, Pl, Ll, B, maxkit = 200, maxit = 100){    
     # Initialize
     nci = nrow(B)
     nb  = ncol(B)
@@ -125,7 +134,12 @@ fitLapl = function(Fx, Ci, Pl, Ll, B, maxkit = 200, maxit = 100){
     return(out)
 }
 
-# Adaptive penalty 
+#' Adaptive penalty 
+#'
+#' Create adaptive penalty as sum of its components
+#' @param la: vector of smoothing patametes
+#' @param Pl: list of penalty components
+#' @return adaptive penalty matrix
 adapt_pen = function(la, Pl)
 {
     Pprod = lapply(1:length(Pl), function(i) Pl[[i]] * (la[i]) )

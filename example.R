@@ -32,7 +32,7 @@ Pl = pen_comp$Pl
 Ll = pen_comp$Ll
 
 # Estimate eta/lambdas
-ests = fitLapl(Fx = Fx, Ci = Ci, Pl = Pl, Ll = Ll, B = B)
+ests = fit_smooth_deconvolution(Fx = Fx, Ci = Ci, Pl = Pl, Ll = Ll, B = B)
 h = ests$h
 la = ests$la
 resid = ests$resid
