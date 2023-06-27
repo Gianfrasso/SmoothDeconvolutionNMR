@@ -56,7 +56,7 @@ define_adaptive_penalty = function(Ba, D, dd, extra_ridge)
 #' @param Ll: list with a columns of the adaptive penalty bases
 #' @param maxkit: max number of updates for smoothing parameter estimation
 #' @param maxit: maximum number of internal IWLS steps (coefficient estimation)
-#' @return list of results #TODO
+#' @return list of results TODO
 fit_smooth_deconvolution = function(Fx, Ci, Pl, Ll, B, maxkit = 200, maxit = 100){    
     # Initialize
     nci = nrow(B)
