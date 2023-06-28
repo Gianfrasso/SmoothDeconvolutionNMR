@@ -6,4 +6,4 @@ The repository also contains the potato tubers data preesented in Hansen, C. L.,
 Determination of dry matter content in potato tubers by low-field nuclear magnetic resonance (LF-NMR). _Journal of Agricultural and Food Chemistry_, 58(19), 10300–10304.
 
 Running the `example.R` file it is possible to reproduce Figure 2 of the reference.
-A package is under construction. In the meantime, please contact me at gianfrass@gmail.com for questions and issues.
+A package is under construction. In the meantime, please contact me at gianfrasso@gmail.com for questions and issues.
