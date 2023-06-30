@@ -33,16 +33,16 @@ Ll = pen_comp$Ll
 
 # Estimate eta/lambdas
 ests = fit_smooth_deconvolution(Fx = Fx, Ci = Ci, Pl = Pl, Ll = Ll, B = B)
-h = ests$h
+h = ests$h * scl
 la = ests$la
 resid = ests$resid
-mu = Ci %*% h
-res = ests$res
+mu = Ci %*% h 
+res = ests$res * scl
 
 # Plot results
 fitDat = data.frame(
-  x = x, obs = Fx * scl, fit = mu * scl,
-  resid = res * scl
+  x = x, obs = Fx * scl, fit = mu,
+  resid = res 
 )
 estDat = data.frame(time = 10^tt, h = h)
 penDat = data.frame(
