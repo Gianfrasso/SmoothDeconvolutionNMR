@@ -53,11 +53,10 @@ define_adaptive_penalty = function(Ba, D, dd, extra_ridge)
 #' @param Fx: observed residual magnetization
 #' @param Ci: deconvolution matrix for integration
 #' @param Pl: adaptive penalty components
-#' @param Ll: list with a columns of the adaptive penalty bases
 #' @param maxkit: max number of updates for smoothing parameter estimation
 #' @param maxit: maximum number of internal IWLS steps (coefficient estimation)
 #' @return list of results TODO
-fit_smooth_deconvolution = function(Fx, Ci, Pl, Ll, B, maxkit = 200, maxit = 100){    
+fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){    
     # Initialize
     nci = nrow(B)
     nb  = ncol(B)
@@ -103,35 +102,53 @@ fit_smooth_deconvolution = function(Fx, Ci, Pl, Ll, B, maxkit = 200, maxit = 100
             param   = parmNew
             it      = it + 1
         }    
-
-        # Update variance components
-        lP = append(list(tXbXb), lapply(1:length(Ll), function(i) Pl[[i]])) 
-        ADcholC = LMMsolver:::ADchol(lP)
-        theta = c(1.0, la)
-        dldet = LMMsolver:::dlogdet(ADcholC, theta) 
-        gk = dldet[-1] * la
-        ed = (theta * dldet)[1]
-
-        lP = append(list(diag.spam(nb)), lapply(1:length(Ll), function(i) Pl[[i]]))
-        ADcholC = LMMsolver:::ADchol(lP)
-        theta = c(0, la)
-        fk = LMMsolver:::dlogdet(ADcholC, theta)[-1] * la
-
-        psi = sapply(Pl, function(x) c(t(eta) %*% x %*% eta)) / (fk - gk)
-        vphi= sum((res)**2) / (n - ed) 
-        lan = pmax(1e-8, vphi/(1e-10 + psi))
+        # Update smoothing parameters
+        varicance_updates = update_variance_components(tXbXb, eta, res, la)
+        lan = varicance_updates$lan
 
         # Check convergence
         crit_kp = sum((la-lan)**2) / (.1 + sum(la**2))
-        la      = lan 
+        la = lan 
         cat("iter Outer:", kit, "crit:", crit_kp, "iter Inner:", it, "\n")
 
         if(crit_kp < tol) break 
     }
     
-    
-    out = list(eta = eta, h = h, res = res, la = la, ed = ed, edk = (fk - gk), kit = kit, conv = kit < maxkit)
+    # Output
+    ed = varicance_updates$ed
+    edk = varicance_updates$edk
+    out = list(eta = eta, h = h, res = res, la = la, ed = ed, edk = edk, kit = kit, conv = kit < maxkit)
     return(out)
+}
+
+#' Update variance components
+#' 
+#' Update components of the adapitve penalty
+#' @param tXbXb: quaddatic form iwls
+#' @param eta: current spline coefficients
+#' @param res: current working resiquals
+#' @param la: current smoothing parameters coefficients
+#' @return list of variance components
+update_variance_components = function(tXbXb, eta, res, la)
+{
+    # Update variance components
+    lP = append(list(tXbXb), lapply(1:length(Pl), function(i) Pl[[i]])) 
+    ADcholC = LMMsolver:::ADchol(lP)
+    theta = c(1.0, la)
+    dldet = LMMsolver:::dlogdet(ADcholC, theta) 
+    gk = dldet[-1] * la
+    ed = (theta * dldet)[1]
+
+    lP = append(list(diag.spam(ncol(tXbXb))), lapply(1:length(Pl), function(i) Pl[[i]]))
+    ADcholC = LMMsolver:::ADchol(lP)
+    theta = c(0, la)
+    fk = LMMsolver:::dlogdet(ADcholC, theta)[-1] * la
+
+    psi = sapply(Pl, function(x) c(t(eta) %*% x %*% eta)) / (fk - gk)
+    vphi= sum((res)**2) / (n - ed) 
+    lan = pmax(1e-8, vphi/(1e-10 + psi))
+
+    return(list(lan = lan, ed = ed, edk = (fk - gk)))
 }
 
 #' Adaptive penalty 
