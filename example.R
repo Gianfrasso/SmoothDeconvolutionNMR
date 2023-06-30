@@ -27,12 +27,12 @@ D = diff(diag(nb), diff = dd)
 # Bases for adaptive
 xa = 1:(nb - dd) / (nb - dd)
 Ba = bbase(xa, nseg = 5, bdeg = 3)
-pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=1e-12)
+pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=1e-14)
 Pl = pen_comp$Pl
 Ll = pen_comp$Ll
 
 # Estimate eta/lambdas
-ests = fit_smooth_deconvolution(Fx = Fx, Ci = Ci, Pl = Pl, Ll = Ll, B = B)
+ests = fit_smooth_deconvolution(Fx = Fx, Ci = Ci, Pl = Pl, B = B)
 h = ests$h * scl
 la = ests$la
 resid = ests$resid

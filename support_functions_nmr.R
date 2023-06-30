@@ -131,7 +131,6 @@ fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){
 #' @return list of variance components
 update_variance_components = function(tXbXb, eta, res, la)
 {
-    # Update variance components
     lP = append(list(tXbXb), lapply(1:length(Pl), function(i) Pl[[i]])) 
     ADcholC = LMMsolver:::ADchol(lP)
     theta = c(1.0, la)
