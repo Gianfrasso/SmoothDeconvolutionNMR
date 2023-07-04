@@ -73,28 +73,13 @@ fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){
         for(it in 1:maxit)  
         {
             # Set RHS
-            eta = c(param)
-            phi = exp(B %*% eta) 
-            h   = phi 
-            mu  = (Ci %*% (h)) 
-            res = c(Fx - mu)
-        
-            # Gradient
-            H    = diag.spam(c(h))
+            iwls_est = iwls_step(param, Fx, B, Ci, Pl, la)
+            parmNew = iwls_est$par
+            tXbXb = iwls_est$tXbXb
+            res = iwls_est$res
 
-            # set LHS
-            Xb   = (Ci) %*% H %*% B
-            tXb  = t(Xb) 
-            tXbXb = tXb %*% Xb
-        
-            # Update pars
-            Pprod = lapply(1:length(Ll), function(i) Pl[[i]]* (la[i]) )
-            P  = Reduce('+', Pprod)
-            Gi = tXbXb + P 
-            parmNew = solve(Gi, tXb %*% (res + Xb %*% eta))
-        
             # Check conv
-            de    = sum((parmNew - param)**2) / (.1 + sum(param**2))
+            de  = sum((parmNew - param)**2) / (.1 + sum(param**2))
             print(de)
             crit  = de < tol
             parmNew = lz * parmNew + (1-lz) * param
@@ -103,7 +88,7 @@ fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){
             it      = it + 1
         }    
         # Update smoothing parameters
-        varicance_updates = update_variance_components(tXbXb, eta, res, la)
+        varicance_updates = update_variance_components(tXbXb, param, res, Pl, la)
         lan = varicance_updates$lan
 
         # Check convergence
@@ -115,11 +100,48 @@ fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){
     }
     
     # Output
+    h = iwls_est$h
     ed = varicance_updates$ed
     edk = varicance_updates$edk
-    out = list(eta = eta, h = h, res = res, la = la, ed = ed, edk = edk, kit = kit, conv = kit < maxkit)
+    out = list(eta = param, h = h, res = res, la = la, ed = ed, edk = edk, kit = kit, conv = kit < maxkit)
     return(out)
 }
+
+#' IWLS step
+#' 
+#' Update splines coefs via IWLS 
+#' @param coefs: current spline coefficients
+#' @param Fx: observed residual magnetization (response variable)
+#' @param B: B-spline matric
+#' @param Ci: integration matrix
+#' @param Pl: adaptive penalty components
+#' @param la: current smoothing parameters coefficients
+iwls_step = function(coefs, Fx, B, Ci, Pl, la)
+{
+    eta = c(coefs)
+    phi = exp(B %*% eta) 
+    h   = phi 
+    mu  = (Ci %*% (h)) 
+    res = c(Fx - mu)
+        
+    # Gradient
+    H = diag.spam(c(h))
+
+    # set LHS
+    Xb = (Ci) %*% H %*% B
+    tXb = t(Xb) 
+    tXbXb = tXb %*% Xb
+        
+    # Update pars
+    Pprod = lapply(1:length(Ll), function(i) Pl[[i]]* (la[i]) )
+    P  = Reduce('+', Pprod)
+    Gi = tXbXb + P 
+    parmNew = solve(Gi, tXb %*% (res + Xb %*% eta))
+
+    # Ouput
+    return(list(par = parmNew, tXbXb = tXbXb, res = res, h = h))
+}
+
 
 #' Update variance components
 #' 
@@ -127,9 +149,10 @@ fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){
 #' @param tXbXb: quaddatic form iwls
 #' @param eta: current spline coefficients
 #' @param res: current working resiquals
+#' @param Pl: adaptive penalty components
 #' @param la: current smoothing parameters coefficients
 #' @return list of variance components
-update_variance_components = function(tXbXb, eta, res, la)
+update_variance_components = function(tXbXb, eta, res, Pl, la)
 {
     lP = append(list(tXbXb), lapply(1:length(Pl), function(i) Pl[[i]])) 
     ADcholC = LMMsolver:::ADchol(lP)
