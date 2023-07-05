@@ -41,11 +41,26 @@ define_adaptive_penalty = function(Ba, D, dd, extra_ridge)
 {
     Ll = lapply(1:ncol(Ba), function(x) Ba[, x])
     Pl = lapply(Ll, function(x) {
-    as.spam(t(D) %*% diag(x) %*% D + extra_ridge * diag(1 / ncol(Ba), nb))
+    as.spam(t(D) %*% diag(x) %*% D + extra_ridge * diag(1 / ncol(Ba), ncol(D)))
     })
     return(list(Pl = Pl, Ll = Ll))
 }
 
+#' Fit initialization
+#' 
+#' Function to initialize fit
+#' @param Fx: observed residual magnetization
+#' @param nla: number of bases for the adaptive penalty
+#' @param Ci: deconvolution matrix for integration
+#' @param B: B-spline matrix
+#' @param D: Difference penalty matrix
+#' @return initial smoothing and spline coefficients
+initialize_smooth_deconvolution = function(Fx, nla, Ci, B, D) 
+{
+    la  = 10^rep(2, nla)
+    eta = solve(t(Ci %*% B) %*% (Ci %*% B) + 1e2 * t(D) %*% D, t(Ci %*% B) %*% Fx, tol = 1e-50)
+    return(list(la = la, eta = eta))
+}
 
 #' Fit function
 #' 
@@ -53,20 +68,19 @@ define_adaptive_penalty = function(Ba, D, dd, extra_ridge)
 #' @param Fx: observed residual magnetization
 #' @param Ci: deconvolution matrix for integration
 #' @param Pl: adaptive penalty components
+#' @param B: B-spline matrix
+#' @param initials: list of initials spline and smoothing coefficients
 #' @param maxkit: max number of updates for smoothing parameter estimation
 #' @param maxit: maximum number of internal IWLS steps (coefficient estimation)
-#' @return list of results TODO
-fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){    
+#' @param lz: spline coefficients update dumping parameter to improve convergence
+#' @param tol: tolerance parameter
+#' @return list of results.
+fit_smooth_deconvolution = function(Fx, Ci, Pl, B, initials, maxkit = 200, maxit = 100, lz  = 0.75, tol = 1e-5){    
     # Initialize
     nci = nrow(B)
     nb  = ncol(B)
-    la  = 10^rep(2, ncol(Ba))
-    eta = solve(t(Ci %*% B) %*% (Ci %*% B) + 1e2 * t(D) %*% D, t(Ci %*% B) %*% Fx, tol = 1e-50
-)
-    lz  = 0.75
-    tol = 1e-5
-    param = eta
-
+    param = initials$eta
+    la = initials$la
     for(kit in 1:maxkit)
     {
         # Estimate eta/lambdas
@@ -112,7 +126,7 @@ fit_smooth_deconvolution = function(Fx, Ci, Pl, B, maxkit = 200, maxit = 100){
 #' Update splines coefs via IWLS 
 #' @param coefs: current spline coefficients
 #' @param Fx: observed residual magnetization (response variable)
-#' @param B: B-spline matric
+#' @param B: B-spline matrix
 #' @param Ci: integration matrix
 #' @param Pl: adaptive penalty components
 #' @param la: current smoothing parameters coefficients
@@ -133,7 +147,7 @@ iwls_step = function(coefs, Fx, B, Ci, Pl, la)
     tXbXb = tXb %*% Xb
         
     # Update pars
-    Pprod = lapply(1:length(Ll), function(i) Pl[[i]]* (la[i]) )
+    Pprod = lapply(1:length(Pl), function(i) Pl[[i]]* (la[i]))
     P  = Reduce('+', Pprod)
     Gi = tXbXb + P 
     parmNew = solve(Gi, tXb %*% (res + Xb %*% eta))
@@ -184,4 +198,46 @@ adapt_pen = function(la, Pl)
     Pprod = lapply(1:length(Pl), function(i) Pl[[i]] * (la[i]) )
     P = Reduce('+', Pprod)
     return(P)
+}
+
+#' Smooth deconvolution 
+#' 
+#' Fit a smooth deconvolution model to observed relaxation
+#' @param Fx: observed residual magnetization (response variable)
+#' @param bdeg: B-spline degree
+#' @param ndx: number of internal B-spline knots
+#' @param dd: order of the difference penalty
+#' @param min_t: minimum u-value (log10 scale) for integration grid
+#' @param max_t: maximum u-value (log10 scale) for integration grid
+#' @param m: number of intrgration point
+#' @return list of results.
+smooth_deconvolution = function(Fx, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5, max_t = 3.5, m = 200)
+{
+    # Define model matrix (with integration rule)
+    tt = define_t2_vector(m, min_t = min_t, max_t = max_t)
+    Ci = define_model_matrix(x, tt)
+
+    # Define bases and penalty
+    B = as.spam(bbase(tt, bdeg = bdeg, nseg = ndx))
+    nb = ncol(B)
+    D = diff(diag(nb), diff = dd)
+
+    # Bases for adaptive penalty
+    xa = 1:(nb - dd) / (nb - dd)
+    Ba = bbase(xa, nseg = 5, bdeg = 3)
+    pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=1e-14)
+    Pl = pen_comp$Pl
+
+    # Initialization
+    scl = max(Fx)
+    initials = initialize_smooth_deconvolution(Fx/scl, ncol(Ba), Ci, B, D)
+
+    # Estimate eta and lambda
+    ests = fit_smooth_deconvolution(Fx = Fx/scl, Ci = Ci, Pl = Pl, B = B, initials = initials)
+    h = ests$h * scl
+    la = ests$la
+    mu = Ci %*% h 
+    res = ests$res * scl
+
+    return(list(h = h, la=la, lla = log10(Ba %*% la), res = res, mu = mu, tt = tt, xa = xa))
 }

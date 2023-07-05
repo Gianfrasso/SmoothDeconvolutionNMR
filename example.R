@@ -5,49 +5,30 @@ source("support_functions_nmr.R")
 # Load the data
 data = readMat("NMRpotato/go01.mat")
 ix = 33
-scl = max(data$X[ix, ])
-Fx = (data$X[ix, ]) / scl
+Fx = (data$X[ix, ])
 x = c(data$Time)
 n = length(x)
 
-# Define model matrix (with integration rule)
-min_t = -3.5
-max_t = 3.5
-tt = define_t2_vector(m = 200, min_t = min_t, max_t = max_t)
-Ci = define_model_matrix(x, tt)
-
-# Define bases and penalty
-bdeg = 3
-ndx = 35
-dd = 2
-B = as.spam(bbase(tt, bdeg = bdeg, nseg = ndx))
-nb = ncol(B)
-D = diff(diag(nb), diff = dd)
-
-# Bases for adaptive
-xa = 1:(nb - dd) / (nb - dd)
-Ba = bbase(xa, nseg = 5, bdeg = 3)
-pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=1e-14)
-Pl = pen_comp$Pl
-Ll = pen_comp$Ll
-
-# Estimate eta/lambdas
-ests = fit_smooth_deconvolution(Fx = Fx, Ci = Ci, Pl = Pl, B = B)
-h = ests$h * scl
+# Smooth deconvolution
+ests = smooth_deconvolution(Fx = Fx)
+h = ests$h
 la = ests$la
 resid = ests$resid
-mu = Ci %*% h 
-res = ests$res * scl
+mu = ests$mu 
+res = ests$res
+lla = ests$lla
+tt = ests$tt 
+xa = ests$xa
 
 # Plot results
 fitDat = data.frame(
-  x = x, obs = Fx * scl, fit = mu,
+  x = x, obs = Fx, fit = mu,
   resid = res 
 )
 estDat = data.frame(time = 10^tt, h = h)
 penDat = data.frame(
-  xa = xa, pen = log10(Ba %*% la),
-  ta = 10^seq(min_t, max_t, len = nrow(Ba))
+  xa = xa, pen = lla,
+  ta = 10^seq(-3.5, 3.5, len = length(xa))
 )
 
 fitPlt = ggplot(fitDat, aes(x = x, y = obs)) +
