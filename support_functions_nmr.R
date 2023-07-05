@@ -204,6 +204,7 @@ adapt_pen = function(la, Pl)
 #' 
 #' Fit a smooth deconvolution model to observed relaxation
 #' @param Fx: observed residual magnetization (response variable)
+#' @param x: observed time vector
 #' @param bdeg: B-spline degree
 #' @param ndx: number of internal B-spline knots
 #' @param dd: order of the difference penalty
@@ -212,8 +213,8 @@ adapt_pen = function(la, Pl)
 #' @param m: number of intrgration point
 #' @param extra_ridge: extra penalty to condition P
 #' @return list of results.
-smooth_deconvolution = function(Fx, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5, max_t = 3.5, m = 200, extra_ridge=1e-12)
-{
+smooth_deconvolution = function(Fx, x, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5, max_t = 3.5, m = 200, extra_ridge=1e-12)
+{   
     # Define model matrix (with integration rule)
     tt = define_t2_vector(m, min_t = min_t, max_t = max_t)
     Ci = define_model_matrix(x, tt)
