@@ -1,5 +1,5 @@
 # Install/load libraries
-libs = c('colorout', 'parallel', 'R.matlab', 'statmod', 'sfsmisc', 'fields', 'JOPS', 'matrixStats', 'scales', 'ggplot2') 
+libs = c('R.matlab', 'spam', 'JOPS', 'scales', 'ggplot2') 
 install.packages(setdiff(libs, rownames(installed.packages())))  
 pkgLoad = lapply(libs, function( x ) require(x, character.only = T))    
 
