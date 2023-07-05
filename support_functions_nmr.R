@@ -35,7 +35,7 @@ define_model_matrix = function(x, tt)
 #' @param Ba: B-spline basis for adaptive penalty
 #' @param D: difference penalty matrix
 #' @param dd: integer order of the difference penalty 
-#' @param extra_ridge: float for identifiability constraint 
+#' @param extra_ridge: float to condition P
 #' @return list of adaptive penalty components
 define_adaptive_penalty = function(Ba, D, dd, extra_ridge)
 {
@@ -210,8 +210,9 @@ adapt_pen = function(la, Pl)
 #' @param min_t: minimum u-value (log10 scale) for integration grid
 #' @param max_t: maximum u-value (log10 scale) for integration grid
 #' @param m: number of intrgration point
+#' @param extra_ridge: extra penalty to condition P
 #' @return list of results.
-smooth_deconvolution = function(Fx, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5, max_t = 3.5, m = 200)
+smooth_deconvolution = function(Fx, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5, max_t = 3.5, m = 200, extra_ridge=1e-12)
 {
     # Define model matrix (with integration rule)
     tt = define_t2_vector(m, min_t = min_t, max_t = max_t)
@@ -225,7 +226,7 @@ smooth_deconvolution = function(Fx, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5, ma
     # Bases for adaptive penalty
     xa = 1:(nb - dd) / (nb - dd)
     Ba = bbase(xa, nseg = 5, bdeg = 3)
-    pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=1e-14)
+    pen_comp = define_adaptive_penalty(Ba, D, dd, extra_ridge=extra_ridge)
     Pl = pen_comp$Pl
 
     # Initialization
