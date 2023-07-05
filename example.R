@@ -10,7 +10,7 @@ x = c(data$Time)
 n = length(x)
 
 # Smooth deconvolution
-ests = smooth_deconvolution(Fx = Fx)
+ests = smooth_deconvolution(Fx = Fx, x=x)
 h = ests$h
 la = ests$la
 resid = ests$resid
