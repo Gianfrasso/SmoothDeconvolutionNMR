@@ -3,13 +3,12 @@ source("utils.R")
 #' Initialization
 #' 
 #' Initialize class smooth_deconv
-setup_smooth_deconv = function(Fx, x, m, min_t, max_t, dd, ndx, bdeg,
-    extra_ridge) {
-        obj = list(Fx = Fx, scl = max(Fx), x = x, m = m, min_t = min_t, max_t = max_t, dd = dd, ndx = ndx, bdeg = bdeg,
-    extra_ridge = extra_ridge)
+setup_smooth_deconv = function(Fx, x, m, min_t, max_t, dd, ndx, bdeg, extra_ridge) {
+    obj = list(Fx = Fx, scl = max(Fx), x = x, m = m, min_t = min_t, max_t = max_t,
+        dd = dd, ndx = ndx, bdeg = bdeg, extra_ridge = extra_ridge)
     class(obj) = "smooth_deconv"
     return(obj)
-    }
+}
 
 
 #' Fit initialization
@@ -57,7 +56,7 @@ initialize.smooth_deconv = function(obj) {
     obj$Ba = Ba
     obj$tt = tt
     obj$xa = xa
-    
+
     return(obj)
 }
 
@@ -131,7 +130,7 @@ fit.smooth_deconv = function(obj, maxkit = 200, maxit = 100, lz = 0.75, tol = 1e
 #' @param obj: an pbject of class smooth_deconv
 #' @return ggplot with 4 panels: data and fit, spectrum,
 #' residuals and adaptive penalty
-plot.smooth_deconv = function(obj){
+plot.smooth_deconv = function(obj) {
     h = ests$h
     la = ests$la
     resid = ests$resid
@@ -158,8 +157,9 @@ plot.smooth_deconv = function(obj){
     resPlt = ggplot(fitDat, aes(x = x, y = resid)) + geom_point() + geom_hline(yintercept = 0,
         colour = "gray50") + xlab("Time (ms)") + ylab("Residuals") + theme_bw()
 
-    penPlt = ggplot(penDat, aes(x = ta, y = pen)) + geom_point() + geom_line() + scale_x_continuous(trans = "log10") +
-        xlab("Time (ms) - log10 scale") + ylab("Adaptive penalty - log10 scale") + theme_bw()
+    penPlt = ggplot(penDat, aes(x = ta, y = pen)) + geom_point() + geom_line() +
+        scale_x_continuous(trans = "log10") + xlab("Time (ms) - log10 scale") + ylab("Adaptive penalty - log10 scale") +
+        theme_bw()
 
     plRes = gridExtra::grid.arrange(fitPlt, estPlt, resPlt, penPlt, nrow = 2, ncol = 2)
     return(plRes)
@@ -180,7 +180,7 @@ plot.smooth_deconv = function(obj){
 #' @return list of results.
 smooth_deconvolution = function(Fx, x, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5,
     max_t = 3.5, m = 200, extra_ridge = 1e-12) {
-    
+
     smooth_deconv = setup_smooth_deconv(Fx, x, m, min_t, max_t, dd, ndx, bdeg, extra_ridge)
 
     # Initialization
