@@ -25,3 +25,4 @@ ests = smooth_deconvolution(Fx = Fx, x = x)
 plRes = plot(ests)
 ggsave("Figure2.pdf", plRes, width = 10, height = 6)  
 ```
+[Figure2.pdf](https://github.com/Gianfrasso/SmoothDeconvolutionNMR/files/11980755/Figure2.pdf)
