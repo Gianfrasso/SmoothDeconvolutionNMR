@@ -131,14 +131,14 @@ fit.smooth_deconv = function(obj, maxkit = 200, maxit = 100, lz = 0.75, tol = 1e
 #' @return ggplot with 4 panels: data and fit, spectrum,
 #' residuals and adaptive penalty
 plot.smooth_deconv = function(obj) {
-    h = ests$h
-    la = ests$la
-    resid = ests$resid
-    mu = ests$mu
-    res = ests$res
-    lla = ests$lla
-    tt = ests$tt
-    xa = ests$xa
+    h = obj$h
+    la = obj$la
+    resid = obj$resid
+    mu = obj$mu
+    res = obj$res
+    lla = obj$lla
+    tt = obj$tt
+    xa = obj$xa
 
     # Plot results
     fitDat = data.frame(x = x, obs = Fx, fit = mu, resid = res)
