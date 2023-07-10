@@ -18,7 +18,6 @@ data = readMat("NMRpotato/go01.mat")
 ix = 33
 Fx = (data$X[ix, ])
 x = c(data$Time)
-n = length(x)
 
 # Smooth deconvolution
 ests = smooth_deconvolution(Fx = Fx, x = x)
