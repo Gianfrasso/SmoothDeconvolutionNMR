@@ -184,7 +184,6 @@ smooth_deconvolution = function(Fx, x, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5,
     smooth_deconv = setup_smooth_deconv(Fx, x, m, min_t, max_t, dd, ndx, bdeg, extra_ridge)
 
     # Initialization
-    scl = max(Fx)
     initials = initialize(smooth_deconv)
 
     # Estimate eta and lambda
