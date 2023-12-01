@@ -98,8 +98,8 @@ fit.smooth_deconv = function(obj, maxkit = 200, maxit = 100, lz = 0.75, tol = 1e
             param = parmNew
             it = it + 1
         }
-        varicance_updates = update_variance_components(tXbXb, param, res, Pl, la)
-        lan = varicance_updates$lan
+        variance_updates = update_variance_components(tXbXb, param, res, Pl, la)
+        lan = variance_updates$lan
 
         crit_kp = sum((la - lan)^2)/(0.1 + sum(la^2))
         la = lan
@@ -111,8 +111,8 @@ fit.smooth_deconv = function(obj, maxkit = 200, maxit = 100, lz = 0.75, tol = 1e
 
     # Output
     h = iwls_est$h
-    ed = varicance_updates$ed
-    edk = varicance_updates$edk
+    ed = variance_updates$ed
+    edk = variance_updates$edk
     obj$eta = param
     obj$h = h * obj$scl
     obj$res = res * obj$scl
