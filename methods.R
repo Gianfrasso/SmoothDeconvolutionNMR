@@ -147,9 +147,8 @@ plot.smooth_deconv = function(obj) {
 
     fitPlt = ggplot(fitDat, aes(x = x, y = obs)) + geom_point() + geom_line(aes(x = x,
         y = fit), colour = "orange") + xlab("Time (ms)") + ylab("Residual magnetisation") +
-        ggtitle(paste("Sample", ix, "(DM =", paste0(round(data$Y[ix, 1], 5), "%)"))) +
         theme_bw()
-
+    
     estPlt = ggplot(estDat, aes(x = time, y = h)) + geom_line() + scale_x_continuous(trans = "log10",
         limits = range(data$Time) + c(-0.6, 1300)) + xlab("Time (ms) - log10 scale") +
         ylab("Density") + theme_bw()
@@ -178,8 +177,8 @@ plot.smooth_deconv = function(obj) {
 #' @param m: number of intrgration point
 #' @param extra_ridge: extra penalty to condition P
 #' @return list of results.
-smooth_deconvolution = function(Fx, x, bdeg = 3, ndx = 35, dd = 2, min_t = -3.5,
-    max_t = 3.5, m = 200, extra_ridge = 1e-12) {
+smooth_deconvolution = function(Fx, x, bdeg = 3, ndx = 35, dd = 2, min_t = -4,
+    max_t = 4, m = 200, extra_ridge = 1e-12) {
 
     smooth_deconv = setup_smooth_deconv(Fx, x, m, min_t, max_t, dd, ndx, bdeg, extra_ridge)
 
