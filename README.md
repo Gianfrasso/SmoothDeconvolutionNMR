@@ -1,5 +1,7 @@
 # SmoothDeconvolutionNMR
-This repository contains the main functionalities to resolve peaks in NMR relaxation experiments using the smooth deconvolution approach of Frasso and Eilers (2023, forthcoming).
+This repository contains the main functionalities to resolve peaks in NMR relaxation experiments using the smooth deconvolution approach of Gianluca Frasso, Paul H.C. Eilers (2024),
+Smooth deconvolution of low-field NMR signals,
+_Analytica Chimica Acta_ (https://doi.org/10.1016/j.aca.2023.341808).
 The main computations are performed by `smooth_deconvolution()` function included in the `methods.R` module.
 
 The repository also contains the potato tubers data presented in Hansen, C. L., Thybo, A. K., Bertram, H. C., Viereck, N., van den Berg, F., and Engelsen, S. B. (2010). 
