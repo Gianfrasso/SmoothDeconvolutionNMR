@@ -9,7 +9,7 @@ Determination of dry matter content in potato tubers by low-field nuclear magnet
 
 ## Installation
 
-1. Clone the repository: `git clone https://github.com/your_username/your_repo.git`
+1. Clone the repository.
 2. Open R in the project directory.
 3. Install `renv` (if you don't have it already): `install.packages("renv")`
 4. Restore the project's library: `renv::restore()`
