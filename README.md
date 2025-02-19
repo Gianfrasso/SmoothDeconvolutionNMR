@@ -27,3 +27,15 @@ plRes = plot(ests)
 ggsave("Figure2.pdf", plRes, width = 10, height = 6)  
 ```
 
+## Installation
+
+1. Clone the repository: `git clone https://github.com/your_username/your_repo.git`
+2. Open R in the project directory.
+3. Install `renv` (if you don't have it already): `install.packages("renv")`
+4. Restore the project's library: `renv::restore()`
+
+This will install the exact versions of the R packages used in this project, as specified in the `renv.lock` file.
+
+## Usage
+
+After restoring the environment, you can run the R scripts in the project.  For example:
